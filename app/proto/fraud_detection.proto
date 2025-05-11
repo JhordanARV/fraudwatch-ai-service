@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+service FraudDetection {
+  // Streaming bidireccional: el cliente envía audio, el servidor responde con transcripción y diagnóstico
+  rpc StreamAudio (stream AudioChunk) returns (stream TranscriptionResult);
+}
+
+message AudioChunk {
+  bytes data = 1;           // Fragmento de audio en binario (ej: WAV, PCM)
+  string session_id = 2;    // Opcional: id de sesión
+}
+
+message TranscriptionResult {
+  string transcripcion = 1;
+  string diagnostico = 2;
+  int32 riesgo = 3;         // Porcentaje de riesgo
+}

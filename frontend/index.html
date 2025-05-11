@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudWatch AI Service</title>
+    <style>
+        :root {
+            --azul: #2563eb;
+            --azul-claro: #e0e7ff;
+            --rojo: #ff6b6b;
+            --verde: #44d19c;
+            --gris: #f4f6fc;
+            --sombra: 0 4px 18px #0001;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--gris);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: var(--azul);
+            color: #fff;
+            padding: 18px 0 12px 0;
+            box-shadow: var(--sombra);
+            text-align: center;
+            font-size: 2.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .container {
+            max-width: 700px;
+            margin: 35px auto 30px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: var(--sombra);
+            padding: 36px 28px 32px 28px;
+        }
+        label {
+            font-weight: 600;
+            color: #222;
+        }
+        textarea {
+            width: 100%;
+            min-height: 90px;
+            margin-bottom: 14px;
+            border-radius: 7px;
+            border: 1.5px solid #c7d0e2;
+            padding: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        textarea:focus {
+            border-color: var(--azul);
+            outline: none;
+        }
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+        .btn {
+            background: var(--azul);
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 2px 6px #0001;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover:not(:disabled) {
+            background: #1746a2;
+            box-shadow: 0 2px 12px #2563eb22;
+        }
+        .btn:disabled {
+            background: #ccc;
+            color: #888;
+        }
+        .result {
+            background: var(--azul-claro);
+            border-radius: 7px;
+            padding: 18px 18px 10px 18px;
+            margin-top: 17px;
+            font-size: 1.08rem;
+            box-shadow: 0 1px 5px #2563eb11;
+            border-left: 6px solid var(--azul);
+            max-width: 100%;
+            overflow-x: auto;
+            word-break: break-word;
+        }
+        .result pre {
+            background: #eef;
+            padding: 8px;
+            border-radius: 6px;
+            margin: 0;
+            overflow-x: auto;
+            max-width: 100%;
+            white-space: pre-wrap;
+            font-family: inherit;
+        }
+        .diagnostico {
+            font-weight: 700;
+            padding: 3px 12px;
+            border-radius: 6px;
+            background: var(--rojo);
+            color: #fff;
+            margin-right: 8px;
+            display: inline-block;
+        }
+        .diagnostico.no {
+            background: var(--verde);
+            color: #222;
+        }
+        .riesgo {
+            background: #ffd700;
+            color: #222;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-left: 8px;
+            display: inline-block;
+        }
+        #feedback {
+            margin-top: 13px;
+        }
+        #feedback label {
+            margin-right: 10px;
+        }
+        #historial {
+            width: 100%;
+            background: #f9f9ff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px #0001;
+            margin-top: 17px;
+            font-size: 0.98rem;
+            overflow-x: auto;
+        }
+        #historial th, #historial td {
+            padding: 8px 7px;
+            text-align: left;
+        }
+        #historial th {
+            background: #e6eaff;
+            color: #222;
+            font-weight: 600;
+        }
+        #historial tr:nth-child(even) {
+            background: #f2f4fa;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 18px 4vw 18px 4vw; }
+            header { font-size: 1.3rem; }
+            #historial, .result { font-size: 0.97rem; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 6px 1vw 8px 1vw; }
+            textarea { font-size: 0.97rem; }
+            .btn { padding: 8px 8px; font-size: 0.97rem; }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    FraudWatch AI Service
+</header>
+<div class="container">
+
+    <label for="texto">Ingresa un mensaje para analizar:</label>
+    <textarea id="texto" placeholder="Escribe o pega aquí el texto..."></textarea>
+    <button class="btn" onclick="analizarTexto()">Analizar Texto</button>
+    <hr>
+    <label for="audio">O sube un audio (.wav):</label>
+    <input type="file" id="audio" accept="audio/wav">
+    <button class="btn" onclick="subirAudio()">Subir y Analizar Audio</button>
+    <hr>
+    <label>O habla por el micrófono:</label>
+    <button class="btn" id="btn-mic" onclick="toggleMic()">🎤 Iniciar grabación</button>
+    <span id="mic-status" style="font-weight:600;color:#2563eb;margin-left:12px;"></span>
+    <div id="mic-result" class="result" style="display:none;margin-top:12px;"></div>
+<button class="btn" id="btn-reproducir-fragmento" style="display:none;margin-bottom:10px;" onclick="reproducirUltimoFragmento()">🔊 Reproducir último fragmento</button>
+<div id="mic-transcripcion" class="result" style="display:none;margin-top:12px;background:#f0f8ff;"></div>
+    <div id="resultado" class="result"></div>
+    <div id="feedback" style="margin-top:10px;"></div>
+    <h3>Historial de análisis en sesión</h3>
+    <table id="historial" style="width:100%;background:#fff;border-radius:8px;box-shadow:0 1px 4px #0001;margin-top:15px;">
+        <thead><tr><th>Fecha/Hora</th><th>Entrada</th><th>Diagnóstico</th><th>Riesgo</th><th>Feedback</th></tr></thead>
+        <tbody></tbody>
+    </table>
+    <button class="btn" onclick="descargarCSV()">Descargar CSV</button>
+    <button class="btn" onclick="descargarPDF()">Descargar PDF</button>
+</div>
+<script src="/static/recorder.js"></script>
+<script>
+let transcripcionAcumulada = '';
+let ultimaTranscripcionMostrada = '';
+let ultimoDiagnosticoMostrado = '';
+
+let historial = [];
+let ultimoResultado = null;
+
+function extraerDiagnosticoYRiesgo(texto) {
+    const diagMatch = texto.match(/Diagnóstico:\s*(.*)/i);
+    // 1. Busca Riesgo: xx%
+    let riesgoMatch = texto.match(/([0-9]{1,3})\s*%/);
+    // 2. Busca Puntuación de riesgo: xx
+    if (!riesgoMatch) {
+        riesgoMatch = texto.match(/Puntuación de riesgo:\s*([0-9]{1,3})/i);
+    }
+    // 3. Busca Riesgo: xx
+    if (!riesgoMatch) {
+        riesgoMatch = texto.match(/Riesgo:\s*([0-9]{1,3})/i);
+    }
+    // 4. Busca cualquier número de 1 a 3 dígitos
+    if (!riesgoMatch) {
+        riesgoMatch = texto.match(/([0-9]{1,3})/);
+    }
+    return {
+        diagnostico: diagMatch ? diagMatch[1].trim() : '?',
+        riesgo: riesgoMatch ? riesgoMatch[1] : '?'
+    };
+}
+
+async function analizarTexto(origen='manual') {
+    const texto = document.getElementById('texto').value;
+    document.getElementById('resultado').innerText = 'Analizando...';
+    document.getElementById('feedback').innerHTML = '';
+    const resp = await fetch('/analizar-texto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texto })
+    });
+    const data = await resp.json();
+    let res = data.resultado || data.detail || 'Error';
+    // Extraer diagnóstico y riesgo
+    const {diagnostico, riesgo} = extraerDiagnosticoYRiesgo(res);
+    let color = diagnostico.toLowerCase().includes('estafa') ? '#ffcccc' : '#c8f7c5';
+    document.getElementById('resultado').innerHTML = `<b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diagnostico||'?'}</span><br><b>Riesgo:</b> <span style='background:#ffd700;padding:3px 8px;border-radius:5px;'>${riesgo||'?'}%</span><br><br><pre style='background:#eef;padding:8px;border-radius:6px;'>${res}</pre>`;
+    // Guardar en historial
+    ultimoResultado = { fecha: new Date().toLocaleString(), entrada: texto, diagnostico, riesgo, origen, feedback: '' };
+    historial.unshift(ultimoResultado);
+    actualizarHistorial();
+    mostrarFeedback();
+}
+
+async function subirAudio() {
+    const input = document.getElementById('audio');
+    if (!input.files.length) {
+        alert('Selecciona un archivo de audio .wav');
+        return;
+    }
+    document.getElementById('resultado').innerText = 'Transcribiendo y analizando...';
+    document.getElementById('feedback').innerHTML = '';
+    const formData = new FormData();
+    formData.append('file', input.files[0]);
+    const resp = await fetch('/transcribir-audio', {
+        method: 'POST',
+        body: formData
+    });
+    const data = await resp.json();
+    if (data.transcripcion) {
+        document.getElementById('texto').value = data.transcripcion;
+        await analizarTexto('audio');
+    } else {
+        document.getElementById('resultado').innerText = data.detail || 'Error al transcribir.';
+    }
+}
+function actualizarHistorial() {
+    const tbody = document.querySelector('#historial tbody');
+    tbody.innerHTML = '';
+    for (const item of historial) {
+        tbody.innerHTML += `<tr>
+            <td>${item.fecha}</td>
+            <td>${item.entrada.length>40 ? item.entrada.slice(0,40)+'…' : item.entrada}</td>
+            <td>${item.diagnostico}</td>
+            <td>${item.riesgo}</td>
+            <td>${item.feedback||''}</td>
+        </tr>`;
+    }
+}
+
+function mostrarFeedback() {
+    if (!ultimoResultado) return;
+    document.getElementById('feedback').innerHTML = `
+        <label>¿El diagnóstico fue correcto?</label>
+        <button class='btn' onclick='guardarFeedback(true)'>Sí</button>
+        <button class='btn' onclick='guardarFeedback(false)'>No</button>
+    `;
+}
+
+function guardarFeedback(valor) {
+    if (!ultimoResultado) return;
+    ultimoResultado.feedback = valor ? '✔️' : '❌';
+    actualizarHistorial();
+    document.getElementById('feedback').innerHTML = '<b>¡Gracias por tu feedback!</b>';
+}
+
+function descargarCSV() {
+    if (historial.length === 0) {
+        alert('No hay datos para exportar.');
+        return;
+    }
+    const encabezado = ['Fecha/Hora','Entrada','Diagnóstico','Riesgo','Feedback'];
+    const filas = historial.map(h => [h.fecha, h.entrada.replace(/\n/g, ' '), h.diagnostico, h.riesgo, h.feedback]);
+    let csv = encabezado.join(',') + '\n';
+    filas.forEach(fila => {
+        csv += fila.map(campo => '"'+String(campo).replace(/"/g,'""')+'"').join(',') + '\n';
+    });
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'historial_detector_fraudes.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function descargarPDF() {
+    if (historial.length === 0) {
+        alert('No hay datos para exportar.');
+        return;
+    }
+    let ventana = window.open('', '', 'width=800,height=600');
+    ventana.document.write('<html><head><title>Historial de Análisis</title></head><body>');
+    ventana.document.write('<h2>Historial de Análisis de Estafas</h2>');
+    ventana.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">');
+    ventana.document.write('<tr><th>Fecha/Hora</th><th>Entrada</th><th>Diagnóstico</th><th>Riesgo</th><th>Feedback</th></tr>');
+    historial.forEach(h => {
+        ventana.document.write(`<tr><td>${h.fecha}</td><td>${h.entrada.replace(/\n/g,' ')}</td><td>${h.diagnostico}</td><td>${h.riesgo}</td><td>${h.feedback}</td></tr>`);
+    });
+    ventana.document.write('</table>');
+    ventana.document.write('</body></html>');
+    ventana.document.close();
+    ventana.print();
+}
+// --- Grabación y análisis en tiempo real desde micrófono (WAV con Recorder.js) ---
+let recorder, audioContext, micActive = false, micSessionId = null, micInterval = null;
+
+function toggleMic() {
+    if (micActive) {
+        detenerGrabacion();
+    } else {
+        iniciarGrabacion();
+    }
+}
+
+async function iniciarGrabacion() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Tu navegador no soporta grabación de audio.');
+        return;
+    }
+    document.getElementById('mic-result').style.display = 'block';
+    document.getElementById('mic-result').innerHTML = '<b>Esperando audio...</b>';
+    document.getElementById('btn-mic').innerText = '⏹️ Detener grabación';
+    document.getElementById('mic-status').innerText = 'Grabando...';
+    micActive = true;
+    micSessionId = Date.now().toString();
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const input = window.audioContext.createMediaStreamSource(stream);
+    window.recorder = new Recorder(input, { numChannels: 1 });
+    window.recorder.clear(); // Limpiar buffer ANTES de grabar
+    window.recorder.record();
+    window.micInterval = setInterval(exportarFragmento, 5000); // Cada 5 segundos (fragmentos más largos)
+    window._micStream = stream; // Guardar referencia para detener
+}
+
+function detenerGrabacion() {
+    try {
+        if (window.recorder) {
+            window.recorder.stop();
+            window.recorder = null;
+        }
+    } catch (e) {}
+    try {
+        if (window.micInterval) {
+            clearInterval(window.micInterval);
+            window.micInterval = null;
+        }
+    } catch (e) {}
+    try {
+        if (window._micStream) {
+            window._micStream.getTracks().forEach(track => track.stop());
+            window._micStream = null;
+        }
+    } catch (e) {}
+    try {
+        if (window.audioContext && typeof window.audioContext.close === 'function') {
+            window.audioContext.close();
+            window.audioContext = null;
+        }
+    } catch (e) {}
+    micActive = false;
+    document.getElementById('btn-mic').innerText = '🎤 Iniciar grabación';
+    document.getElementById('mic-status').innerText = '';
+}
+
+
+let ultimoFragmentoAudio = null;
+function exportarFragmento() {
+    if (!window.recorder) {
+        console.log('[Mic] No recorder activo');
+        return;
+    }
+    console.log('Buffers antes de exportar:', window.Recorder.forceBuffer.length);
+    window.recorder.exportWAV(async function(blob) {
+        console.log('Buffers después de exportar:', window.Recorder.forceBuffer.length);
+        if (!blob || blob.size === 0) {
+            document.getElementById('mic-result').innerHTML = '<i>No se detectó audio en el fragmento.</i>';
+            document.getElementById('btn-reproducir-fragmento').style.display = 'none';
+            return;
+        }
+        // Guardar el último fragmento para reproducción
+        ultimoFragmentoAudio = blob;
+        document.getElementById('btn-reproducir-fragmento').style.display = 'inline-block';
+        await enviarFragmento(blob, transcripcionAcumulada);
+        window.recorder.clear(); // Limpiar buffer para el próximo fragmento
+    }, 'audio/wav');
+}
+
+function reproducirUltimoFragmento() {
+    if (!ultimoFragmentoAudio) return;
+    const url = URL.createObjectURL(ultimoFragmentoAudio);
+    const audio = new Audio(url);
+    audio.play();
+    audio.onended = () => URL.revokeObjectURL(url);
+}
+
+async function enviarFragmento(blob, transcripcionAcumulada) {
+    let formData = new FormData();
+    let filename = 'fragmento.wav';
+    formData.append('file', blob, filename);
+    // Enviar también el texto acumulado
+    if (transcripcionAcumulada) {
+        formData.append('texto_acumulado', transcripcionAcumulada);
+    }
+    console.log('[Mic] Enviando fragmento a backend:', blob.size, 'bytes, texto acumulado:', transcripcionAcumulada);
+    try {
+        let resp = await fetch('/analizar-audio-stream?session_id=' + micSessionId, {
+            method: 'POST',
+            body: formData
+        });
+        if (!resp.ok) {
+            const err = await resp.text();
+            console.error('[Mic] Error backend:', resp.status, err);
+            document.getElementById('mic-result').innerHTML = '<span style="color:red">Error del backend: ' + resp.status + '</span>';
+            return;
+        }
+        let data = await resp.json();
+        console.log('[Mic] Respuesta backend:', data);
+        mostrarMicResultado(data);
+    } catch (e) {
+        console.error('[Mic] Error al enviar fragmento:', e);
+        document.getElementById('mic-result').innerHTML = '<span style="color:red">Error al analizar audio en tiempo real</span>';
+    }
+}
+
+function mostrarMicResultado(data) {
+    let html = '';
+    let transcripcionAnterior = ultimaTranscripcionMostrada;
+    let diagnosticoAnterior = ultimoDiagnosticoMostrado;
+
+    if (data.transcripcion) {
+        // Acumular la transcripción
+        if (!transcripcionAcumulada) {
+            transcripcionAcumulada = data.transcripcion;
+        } else {
+            // Evitar repeticiones simples, concatenar inteligentemente
+            if (!transcripcionAcumulada.trim().endsWith(data.transcripcion.trim())) {
+                transcripcionAcumulada += ' ' + data.transcripcion;
+            }
+        }
+        // Mostrar la transcripción acumulada en un área dedicada
+        let micTransDiv = document.getElementById('mic-transcripcion');
+        micTransDiv.style.display = 'block';
+        micTransDiv.innerHTML = `<b>Transcripción acumulada:</b><br><span style='color:#1746a2'>${transcripcionAcumulada}</span>`;
+        html += `<b>Último fragmento:</b> <span style='color:#2563eb'>${data.transcripcion}</span><br>`;
+    }
+
+    // Solo actualizar diagnóstico si la transcripción acumulada cambió
+    if (data.diagnostico && transcripcionAcumulada.trim() !== transcripcionAnterior.trim()) {
+        ultimaTranscripcionMostrada = transcripcionAcumulada;
+        ultimoDiagnosticoMostrado = data.diagnostico;
+        // Extraer diagnóstico/riesgo como en analizarTexto
+        const diag = extraerDiagnosticoYRiesgo(data.diagnostico);
+        let color = diag.diagnostico.toLowerCase().includes('estafa') ? '#ffcccc' : '#c8f7c5';
+        html += `<b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diag.diagnostico||'?'} </span> <b>Riesgo:</b> <span class='riesgo'>${diag.riesgo||'?'}%</span><br><pre>${data.diagnostico}</pre>`;
+    } else if (ultimoDiagnosticoMostrado) {
+        // Si no hay cambio en la transcripción, mantener el último diagnóstico
+        const diag = extraerDiagnosticoYRiesgo(ultimoDiagnosticoMostrado);
+        let color = diag.diagnostico.toLowerCase().includes('estafa') ? '#ffcccc' : '#c8f7c5';
+        html += `<b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diag.diagnostico||'?'} </span> <b>Riesgo:</b> <span class='riesgo'>${diag.riesgo||'?'}%</span><br><pre>${ultimoDiagnosticoMostrado}</pre>`;
+    }
+    document.getElementById('mic-result').innerHTML = html || '<i>Esperando audio...</i>';
+}
+// Reiniciar la transcripción acumulada al iniciar grabación
+const originalIniciarGrabacion = iniciarGrabacion;
+iniciarGrabacion = async function() {
+    transcripcionAcumulada = '';
+    let micTransDiv = document.getElementById('mic-transcripcion');
+    micTransDiv.style.display = 'none';
+    micTransDiv.innerHTML = '';
+    await originalIniciarGrabacion.apply(this, arguments);
+};
+</script>
+</body>
+</html>
