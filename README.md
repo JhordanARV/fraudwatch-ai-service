@@ -56,7 +56,11 @@ detector-fraude/
 El servidor FastAPI implementa los siguientes endpoints:
 
 - **GET /** - Página principal (frontend)
-- **POST /analizar-texto** - Analiza un texto para detectar fraudes
+- **POST /register** - Registro de usuario
+- **POST /login** - Login de usuario (devuelve JWT)
+- **POST /analizar-texto** - Analiza un texto para detectar fraudes (requiere JWT)
+- **POST /analisis** - Guarda un análisis asociado al usuario (requiere JWT)
+- **DELETE /analisis/{analisis_id}** - Elimina un análisis del usuario (requiere JWT)
 - **POST /transcribir-audio** - Transcribe un archivo de audio a texto
 - **POST /analizar-audio-grpc** - Envía audio al servicio gRPC y devuelve análisis
 - **POST /analizar-audio-stream** - Procesa fragmentos de audio en tiempo real
@@ -125,7 +129,17 @@ python app/grpc_server.py
 uvicorn app.main:app --reload
 ```
 
-### 3. Acceder a la Interfaz Web
+### 3. Registro y login de usuario (ejemplo con curl)
+```bash
+# Registro
+curl -X POST http://localhost:8000/register -H "Content-Type: application/json" -d '{"username":"usuario1","email":"usuario1@ejemplo.com","password":"clave123"}'
+
+# Login
+curl -X POST http://localhost:8000/login -d "username=usuario1&password=clave123" -H "Content-Type: application/x-www-form-urlencoded"
+# Obtendrás un access_token que debes usar como Bearer en endpoints protegidos
+```
+
+### 4. Acceder a la Interfaz Web
 Abre `frontend/index.html` en tu navegador o configura el backend para servir archivos estáticos.
 
 ---
@@ -146,7 +160,11 @@ Asegúrate de tener instalado `pytest` (ya incluido en requirements.txt):
 pip install -r requirements.txt
 pytest
 ```
-Esto ejecutará los tests ubicados en la carpeta `tests/`. Puedes agregar más archivos de test siguiendo el patrón `test_*.py`.
+Esto ejecutará los tests ubicados en la carpeta `tests/`.
+
+**Nota importante:** Algunos endpoints requieren autenticación JWT. Los tests incluyen registro y login automático para obtener el token y probar los endpoints protegidos. Si cambias la lógica de autenticación, actualiza los tests.
+
+Puedes agregar más archivos de test siguiendo el patrón `test_*.py`.
 
 ## Despliegue en Railway
 1. Sube tu proyecto a GitHub.
@@ -182,6 +200,9 @@ Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 
 ```
 OPENAI_API_KEY=tu_clave_de_api_aqui
+GRPC_SERVER_URL=localhost:50051
+DATABASE_URL=postgresql+asyncpg://usuario:contraseña@host:puerto/db
+SECRET_KEY=alguna_clave_segura
 ```
 
 Puedes obtener tu clave de API en [OpenAI Platform](https://platform.openai.com/api-keys).

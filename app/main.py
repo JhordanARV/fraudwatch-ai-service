@@ -1,16 +1,27 @@
-from fastapi import FastAPI, Request, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, Request, UploadFile, File, Form, HTTPException, Depends, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from datetime import datetime, timedelta
+from typing import List
+import os
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field
+
+from app.database import get_db
+from app import models, schemas
+
 import grpc
 import app.proto.fraud_detection_pb2 as fraud_detection_pb2
 import app.proto.fraud_detection_pb2_grpc as fraud_detection_pb2_grpc
 import speech_recognition as sr
 from openai import OpenAI
 from pydub import AudioSegment
-import os
-from dotenv import load_dotenv
 
 # Cargar variables de entorno desde .env automáticamente
 load_dotenv()
@@ -31,6 +42,126 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Seguridad y JWT ---
+SECRET_KEY = os.getenv("SECRET_KEY", "cambia_esto_en_produccion")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
+# Utilidades de autenticación
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+async def authenticate_user(db: AsyncSession, username: str, password: str):
+    result = await db.execute(select(models.Usuario).where(models.Usuario.username == username))
+    user = result.scalars().first()
+    if user and verify_password(password, user.hashed_password):
+        return user
+    return None
+
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="No autorizado",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    result = await db.execute(select(models.Usuario).where(models.Usuario.username == username))
+    user = result.scalars().first()
+    if user is None:
+        raise credentials_exception
+    return user
+
+# --- Endpoints de autenticación ---
+
+@app.post("/register", response_model=schemas.UsuarioOut)
+async def register(user_in: schemas.UsuarioCreate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(models.Usuario).where((models.Usuario.username == user_in.username) | (models.Usuario.email == user_in.email)))
+    existing_user = result.scalars().first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="El usuario o email ya existe")
+    hashed_pw = get_password_hash(user_in.password)
+    user = models.Usuario(username=user_in.username, email=user_in.email, hashed_password=hashed_pw)
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+@app.post("/login", response_model=schemas.Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    user = await authenticate_user(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(status_code=400, detail="Credenciales incorrectas")
+    access_token = create_access_token(data={"sub": user.username}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    return {"access_token": access_token, "token_type": "bearer"}
+
+# --- Endpoints de análisis asociados al usuario ---
+
+@app.post("/analisis", response_model=schemas.AnalisisOut)
+async def crear_analisis(analisis_in: schemas.AnalisisCreate, db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):
+    analisis = models.Analisis(
+        usuario_id=current_user.id,
+        texto_analizado=analisis_in.texto_analizado,
+        resultado=analisis_in.resultado,
+        session_id=analisis_in.session_id
+    )
+    db.add(analisis)
+    await db.commit()
+    await db.refresh(analisis)
+    return analisis
+
+import logging
+
+@app.get("/analisis", response_model=List[schemas.AnalisisOut])
+async def obtener_analisis(db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):
+    try:
+        result = await db.execute(
+            select(models.Analisis)
+            .where(models.Analisis.usuario_id == current_user.id)
+            .order_by(models.Analisis.fecha.desc())
+        )
+        analisis = result.scalars().all()
+        return analisis
+    except Exception as e:
+        logging.exception("Error al obtener el historial de análisis")
+        # Opcional: puedes devolver el error para depuración
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+
+# --- FIN autenticación y endpoints de análisis ---
+
+# --- Endpoint para eliminar análisis ---
+from fastapi import Path
+
+@app.delete("/analisis/{analisis_id}", status_code=204, tags=["Análisis"], dependencies=[Depends(oauth2_scheme)])
+async def eliminar_analisis(analisis_id: int = Path(..., gt=0), db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):
+    from app.models import Analisis
+    result = await db.execute(select(Analisis).where(Analisis.id == analisis_id, Analisis.usuario_id == current_user.id))
+    analisis = result.scalars().first()
+    if not analisis:
+        raise HTTPException(status_code=404, detail="Análisis no encontrado o no autorizado")
+    await db.delete(analisis)
+    await db.commit()
+    return None
+
+
 def transcribir_audio(audio_path):
     try:
         with open(audio_path, "rb") as audio_file:
@@ -43,6 +174,8 @@ def transcribir_audio(audio_path):
     except Exception as e:
         return f"Error en la transcripción con Whisper: {e}"
 
+# Puedes modificar esta función para guardar automáticamente cada análisis en la base de datos si lo deseas
+
 def analizar_con_ia(texto):
     prompt = f"""
 Eres un analista de seguridad. Evalúa si el siguiente mensaje es potencialmente una estafa.
@@ -54,7 +187,7 @@ Mensaje:
 """
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "Eres un analista de seguridad de ciberfraudes que responde solo en formato JSON estructurado."},
                 {"role": "user", "content": prompt}
@@ -80,6 +213,7 @@ Mensaje:
 class AnalisisTextoResponse(BaseModel):
     resultado: str
     class Config:
+        from_attributes = True
         schema_extra = {
             "example": {
                 "resultado": "Diagnóstico: Estafa\n\nExplicación: Este mensaje solicita datos personales...\n\nRiesgo: 90/100"
@@ -89,6 +223,7 @@ class AnalisisTextoResponse(BaseModel):
 class TranscripcionResponse(BaseModel):
     transcripcion: str
     class Config:
+        from_attributes = True
         schema_extra = {
             "example": {
                 "transcripcion": "Has sido seleccionado para recibir un premio..."
@@ -101,6 +236,7 @@ class AnalisisAudioStreamResponse(BaseModel):
     diagnostico: str = None
     ruta_archivo: str = None
     class Config:
+        from_attributes = True
         schema_extra = {
             "example": {
                 "session_id": "session-123",
@@ -111,26 +247,41 @@ class AnalisisAudioStreamResponse(BaseModel):
         }
 
 @app.post("/analizar-texto", response_model=AnalisisTextoResponse, tags=["Análisis"])
-def endpoint_analizar_texto(payload: dict):
+async def endpoint_analizar_texto(payload: dict, db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):
     texto = payload.get("texto", "")
+    session_id = payload.get("session_id")
+    origen = payload.get("origen", "manual")  # Por defecto 'manual' si no viene
     if not texto:
         raise HTTPException(status_code=400, detail="Texto vacío")
     resultado = analizar_con_ia(texto)
+    # Guardar en base de datos
+    from app.models import Analisis
+    analisis = Analisis(
+        usuario_id=current_user.id,
+        texto_analizado=texto,
+        resultado=resultado,
+        session_id=session_id,
+        origen=origen
+    )
+    db.add(analisis)
+    await db.commit()
+    await db.refresh(analisis)
     return {"resultado": resultado}
 
-@app.post("/transcribir-audio", response_model=TranscripcionResponse, tags=["Transcripción"])
-def endpoint_transcribir_audio(file: UploadFile = File(...)):
-    if not file.filename.endswith('.wav'):
-        raise HTTPException(status_code=400, detail="Solo se aceptan archivos .wav")
-    temp_path = f"temp_{file.filename}"
-    with open(temp_path, "wb") as f:
-        f.write(file.file.read())
-    texto = transcribir_audio(temp_path)
-    os.remove(temp_path)
-    return {"transcripcion": texto}
+@app.post("/transcribir-audio", response_model=TranscripcionResponse, tags=["Transcripción"], dependencies=[Depends(oauth2_scheme)])
+async def endpoint_transcribir_audio(file: UploadFile = File(...), current_user: models.Usuario = Depends(get_current_user)):
+    """
+    Transcribe un archivo de audio usando OpenAI Whisper.
+    """
+    import tempfile
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(file.file.read())
+        tmp_path = tmp.name
+    transcripcion = transcribir_audio(tmp_path)
+    return {"transcripcion": transcripcion}
 
 @app.post("/analizar-audio-stream", response_model=AnalisisAudioStreamResponse, tags=["Análisis"])
-def analizar_audio_stream(file: UploadFile = File(...), session_id: str = None, texto_acumulado: str = Form(None)):
+async def analizar_audio_stream(file: UploadFile = File(...), session_id: str = None, texto_acumulado: str = Form(None), origen: str = Form("audio_stream"), db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):
     """
     Endpoint para analizar fragmentos de audio en tiempo real.
     Recibe un fragmento de audio (wav), un session_id opcional y el texto acumulado.
@@ -194,6 +345,18 @@ def analizar_audio_stream(file: UploadFile = File(...), session_id: str = None, 
     # Usar el texto acumulado si existe para el análisis
     texto_para_analizar = texto_acumulado if texto_acumulado else texto
     resultado = analizar_con_ia(texto_para_analizar) if texto_para_analizar and 'Error' not in texto_para_analizar else None
+    # Guardar en base de datos
+    from app.models import Analisis
+    analisis = Analisis(
+        usuario_id=current_user.id,
+        texto_analizado=texto_para_analizar,
+        resultado=resultado,
+        session_id=session_id,
+        origen=origen
+    )
+    db.add(analisis)
+    await db.commit()
+    await db.refresh(analisis)
     return {
         "session_id": session_id,
         "transcripcion": texto,
@@ -239,8 +402,8 @@ async def analizar_audio_grpc(
             riesgo=response.riesgo
         )
 
-@app.post("/analizar-audio-stream")
-def analizar_audio_stream(file: UploadFile = File(...), session_id: str = None, texto_acumulado: str = Form(None)):
+@app.post("/analizar-audio-stream", response_model=AnalisisAudioStreamResponse, tags=["Análisis"])
+async def analizar_audio_stream(file: UploadFile = File(...), session_id: str = None, texto_acumulado: str = Form(None), origen: str = Form("audio_stream"), db: AsyncSession = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):
     """
     Endpoint para analizar fragmentos de audio en tiempo real.
     Recibe un fragmento de audio (wav), un session_id opcional y el texto acumulado.
@@ -304,6 +467,18 @@ def analizar_audio_stream(file: UploadFile = File(...), session_id: str = None, 
     # Usar el texto acumulado si existe para el análisis
     texto_para_analizar = texto_acumulado if texto_acumulado else texto
     resultado = analizar_con_ia(texto_para_analizar) if texto_para_analizar and 'Error' not in texto_para_analizar else None
+    # Guardar en base de datos
+    from app.models import Analisis
+    analisis = Analisis(
+        usuario_id=current_user.id,
+        texto_analizado=texto_para_analizar,
+        resultado=resultado,
+        session_id=session_id,
+        origen=origen
+    )
+    db.add(analisis)
+    await db.commit()
+    await db.refresh(analisis)
     return {
         "session_id": session_id,
         "transcripcion": texto,

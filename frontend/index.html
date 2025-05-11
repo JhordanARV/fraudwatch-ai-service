@@ -4,105 +4,240 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FraudWatch AI Service</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --azul: #2563eb;
-            --azul-claro: #e0e7ff;
-            --rojo: #ff6b6b;
-            --verde: #44d19c;
-            --gris: #f4f6fc;
-            --sombra: 0 4px 18px #0001;
+            --primary: #4361ee;
+            --primary-light: #e6ecff;
+            --primary-dark: #3a56d4;
+            --accent: #f72585;
+            --success: #06d6a0;
+            --warning: #ffd166;
+            --danger: #ef476f;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --transition: all 0.2s ease;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: var(--gris);
+            font-family: var(--font-sans);
+            background: linear-gradient(135deg, #f6f8ff 0%, #edf1fc 100%);
+            color: var(--gray-700);
+            line-height: 1.6;
+            min-height: 100vh;
             margin: 0;
             padding: 0;
         }
         header {
-            background: var(--azul);
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: #fff;
-            padding: 18px 0 12px 0;
-            box-shadow: var(--sombra);
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow-md);
             text-align: center;
-            font-size: 2.1rem;
-            font-weight: 700;
-            letter-spacing: 1px;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 10;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .brand-icon {
+            font-size: 2rem;
         }
         .container {
-            max-width: 700px;
-            margin: 35px auto 30px auto;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        .card {
             background: #fff;
-            border-radius: 16px;
-            box-shadow: var(--sombra);
-            padding: 36px 28px 32px 28px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background: var(--primary-light);
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+        .card-body {
+            padding: 1.5rem;
         }
         label {
+            display: block;
             font-weight: 600;
-            color: #222;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        textarea, input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            background-color: #fff;
+            color: var(--gray-800);
+            transition: var(--transition);
+            margin-bottom: 1rem;
+        }
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
         }
         textarea {
-            width: 100%;
-            min-height: 90px;
-            margin-bottom: 14px;
-            border-radius: 7px;
-            border: 1.5px solid #c7d0e2;
-            padding: 10px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-        textarea:focus {
-            border-color: var(--azul);
-            outline: none;
+            min-height: 120px;
+            resize: vertical;
         }
         input[type="file"] {
-            margin-bottom: 10px;
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px dashed var(--gray-300);
+            border-radius: var(--radius-md);
+            background-color: var(--gray-50);
         }
         .btn {
-            background: var(--azul);
+            background: var(--primary);
             color: #fff;
             border: none;
-            padding: 10px 22px;
-            border-radius: 6px;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
             cursor: pointer;
-            margin-right: 10px;
-            font-size: 1rem;
+            margin-right: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
             font-weight: 500;
-            box-shadow: 0 2px 6px #0001;
-            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
         }
         .btn:hover:not(:disabled) {
-            background: #1746a2;
-            box-shadow: 0 2px 12px #2563eb22;
+            background: var(--primary-dark);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25);
+        }
+        .btn:active {
+            transform: translateY(1px);
         }
         .btn:disabled {
-            background: #ccc;
-            color: #888;
+            background: var(--gray-300);
+            color: var(--gray-500);
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-danger {
+            background: var(--danger);
+        }
+        .btn-danger:hover:not(:disabled) {
+            background: #d63c65;
+        }
+        .btn-success {
+            background: var(--success);
+        }
+        .btn-success:hover:not(:disabled) {
+            background: #05c091;
+        }
+        .btn-warning {
+            background: var(--warning);
+            color: var(--gray-800);
+        }
+        .btn-warning:hover:not(:disabled) {
+            background: #ffc74d;
         }
         .result {
-            background: var(--azul-claro);
-            border-radius: 7px;
-            padding: 18px 18px 10px 18px;
-            margin-top: 17px;
-            font-size: 1.08rem;
-            box-shadow: 0 1px 5px #2563eb11;
-            border-left: 6px solid var(--azul);
-            max-width: 100%;
-            overflow-x: auto;
-            word-break: break-word;
+            background: #fff;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            box-shadow: var(--shadow-sm);
         }
         .result pre {
-            background: #eef;
-            padding: 8px;
-            border-radius: 6px;
-            margin: 0;
+            background: var(--gray-50);
+            padding: 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            margin: 1rem 0 0.5rem 0;
             overflow-x: auto;
             max-width: 100%;
             white-space: pre-wrap;
-            font-family: inherit;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .tag-danger {
+            background: rgba(239, 71, 111, 0.15);
+            color: var(--danger);
+        }
+        .tag-success {
+            background: rgba(6, 214, 160, 0.15);
+            color: var(--success);
+        }
+        .tag-warning {
+            background: rgba(255, 209, 102, 0.2);
+            color: #b07800;
         }
         .diagnostico {
             font-weight: 700;
@@ -132,78 +267,850 @@
         #feedback label {
             margin-right: 10px;
         }
-        #historial {
-            width: 100%;
-            background: #f9f9ff;
-            border-radius: 8px;
-            box-shadow: 0 1px 4px #0001;
-            margin-top: 17px;
-            font-size: 0.98rem;
+        .table-container {
             overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
         }
-        #historial th, #historial td {
-            padding: 8px 7px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        table th, table td {
+            padding: 0.875rem 1rem;
             text-align: left;
+            vertical-align: middle;
         }
-        #historial th {
-            background: #e6eaff;
-            color: #222;
+        table th {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            box-shadow: inset 0 -1px 0 var(--gray-200);
+        }
+        table tr:not(:last-child) {
+            border-bottom: 1px solid var(--gray-200);
+        }
+        table tr:nth-child(even) {
+            background: var(--gray-50);
+        }
+        table tbody tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        .actions-cell {
+            text-align: right;
+            padding-right: 1rem;
+            white-space: nowrap;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        .status-active {
+            background-color: var(--success);
+        }
+        .status-inactive {
+            background-color: var(--gray-400);
+        }
+        .table-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-500);
+            font-style: italic;
+        }
+        /* Estilos de grid y layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        .app-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1.5rem;
+        }
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.25rem;
+            background: none;
+            border: none;
+            font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+        .tab-btn.active {
+            color: var(--primary);
             font-weight: 600;
         }
-        #historial tr:nth-child(even) {
-            background: #f2f4fa;
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
         }
-        @media (max-width: 700px) {
-            .container { padding: 18px 4vw 18px 4vw; }
-            header { font-size: 1.3rem; }
-            #historial, .result { font-size: 0.97rem; }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--gray-500);
+        }
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-300);
+        }
+        
+        /* Botones pequeños y outline */
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary-dark);
+        }
+        
+        /* Contenedor de resultados */
+        .result-container {
+            min-height: 200px;
+            word-wrap: break-word;
+        }
+        .feedback-container {
+            margin-top: 1rem;
+        }
+        .p-0 {
+            padding: 0 !important;
+        }
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+        
+        /* Badge de estado */
+        .status-badge {
+            display: inline-block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            margin-left: 0.75rem;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+        
+        /* Controles de micrófono */
+        .mic-controls {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        /* Íconos */
+        .icon {
+            margin-right: 0.5rem;
+            font-style: normal;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .card-actions {
+                margin-top: 0.75rem;
+            }
         }
         @media (max-width: 480px) {
-            .container { padding: 6px 1vw 8px 1vw; }
-            textarea { font-size: 0.97rem; }
-            .btn { padding: 8px 8px; font-size: 0.97rem; }
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+            }
+            .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 
 <body>
 <header>
-    FraudWatch AI Service
+    <div class="header-content">
+        <div class="brand">
+            <span class="brand-icon">🛡️</span>
+            <span>FraudWatch AI</span>
+        </div>
+        <div id="header-actions"></div>
+    </div>
 </header>
 <div class="container">
-
-    <label for="texto">Ingresa un mensaje para analizar:</label>
-    <textarea id="texto" placeholder="Escribe o pega aquí el texto..."></textarea>
-    <button class="btn" onclick="analizarTexto()">Analizar Texto</button>
-    <hr>
-    <label for="audio">O sube un audio (.wav):</label>
-    <input type="file" id="audio" accept="audio/wav">
-    <button class="btn" onclick="subirAudio()">Subir y Analizar Audio</button>
-    <hr>
-    <label>O habla por el micrófono:</label>
-    <button class="btn" id="btn-mic" onclick="toggleMic()">🎤 Iniciar grabación</button>
-    <span id="mic-status" style="font-weight:600;color:#2563eb;margin-left:12px;"></span>
-    <div id="mic-result" class="result" style="display:none;margin-top:12px;"></div>
-<button class="btn" id="btn-reproducir-fragmento" style="display:none;margin-bottom:10px;" onclick="reproducirUltimoFragmento()">🔊 Reproducir último fragmento</button>
-<div id="mic-transcripcion" class="result" style="display:none;margin-top:12px;background:#f0f8ff;"></div>
-    <div id="resultado" class="result"></div>
-    <div id="feedback" style="margin-top:10px;"></div>
-    <h3>Historial de análisis en sesión</h3>
-    <table id="historial" style="width:100%;background:#fff;border-radius:8px;box-shadow:0 1px 4px #0001;margin-top:15px;">
-        <thead><tr><th>Fecha/Hora</th><th>Entrada</th><th>Diagnóstico</th><th>Riesgo</th><th>Feedback</th></tr></thead>
-        <tbody></tbody>
-    </table>
-    <button class="btn" onclick="descargarCSV()">Descargar CSV</button>
-    <button class="btn" onclick="descargarPDF()">Descargar PDF</button>
-</div>
+    <div id="auth-forms" style="max-width:450px;margin:2rem auto;">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title" id="auth-title">Iniciar sesión</h2>
+            </div>
+            <div class="card-body">
+                <div id="auth-msg" class="mb-4"></div>
+                
+                <form id="form-login" style="display:none;">
+                    <div class="form-group">
+                        <label for="login-usuario">Usuario</label>
+                        <input type="text" id="login-usuario" placeholder="Ingresa tu nombre de usuario" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Contraseña</label>
+                        <input type="password" id="login-password" placeholder="Ingresa tu contraseña" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn">Iniciar sesión</button>
+                        <button type="button" class="btn btn-outline" onclick="mostrarTab('register')">Crear cuenta</button>
+                    </div>
+                </form>
+                
+                <form id="form-register" style="display:none;">
+                    <div class="form-group">
+                        <label for="reg-usuario">Usuario</label>
+                        <input type="text" id="reg-usuario" placeholder="Elige un nombre de usuario" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-email">Email</label>
+                        <input type="email" id="reg-email" placeholder="Ingresa tu correo electrónico" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-password">Contraseña</label>
+                        <input type="password" id="reg-password" placeholder="Crea una contraseña segura" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-password2">Confirmar contraseña</label>
+                        <input type="password" id="reg-password2" placeholder="Repite tu contraseña" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn">Crear cuenta</button>
+                        <button type="button" class="btn btn-outline" onclick="mostrarTab('login')">Ya tengo cuenta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="app-main" style="display:none;">
+        <div class="app-header">
+            <button class="btn btn-danger" onclick="logout()">
+                <i class="icon">&#x23FB;</i> Cerrar sesión
+            </button>
+        </div>
+        
+        <div class="grid">
+            <!-- Panel de análisis de texto -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Detector de Fraudes</h2>
+                </div>
+                <div class="card-body">
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="showTab('tab-text')">Texto</button>
+                        <button class="tab-btn" onclick="showTab('tab-audio')">Audio</button>
+                        <button class="tab-btn" onclick="showTab('tab-mic')">Micrófono</button>
+                    </div>
+                    
+                    <div id="tab-text" class="tab-content active">
+                        <div class="form-group">
+                            <label for="texto">Ingresa un mensaje para analizar:</label>
+                            <textarea id="texto" placeholder="Escribe o pega aquí el texto sospechoso..."></textarea>
+                            <button class="btn" onclick="analizarTexto()">
+                                <i class="icon">&#x1F50D;</i> Analizar Texto
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="tab-audio" class="tab-content">
+                        <div class="form-group">
+                            <label for="audio">Sube un archivo de audio (.wav):</label>
+                            <input type="file" id="audio" accept="audio/wav" class="file-input">
+                            <button class="btn" onclick="subirAudio()">
+                                <i class="icon">&#x1F4E5;</i> Analizar Audio
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="tab-mic" class="tab-content">
+                        <div class="form-group">
+                            <label>Grabación en tiempo real:</label>
+                            <div class="mic-controls">
+                                <button class="btn" id="btn-mic" onclick="toggleMic()">
+                                    <i class="icon">🎤</i> Iniciar grabación
+                                </button>
+                                <span id="mic-status" class="status-badge"></span>
+                            </div>
+                            <button class="btn btn-outline" id="btn-reproducir-fragmento" style="display:none;" onclick="reproducirUltimoFragmento()">
+                                <i class="icon">🔊</i> Reproducir fragmento
+                            </button>
+                        </div>
+                        <div id="mic-transcripcion" class="result" style="display:none;"></div>
+                        <div id="mic-result" class="result" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Panel de resultados -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Resultado del Análisis</h2>
+                </div>
+                <div class="card-body">
+                    <div id="resultado" class="result-container">
+                        <div class="empty-state">
+                            <div class="empty-icon">&#x1F50D;</div>
+                            <p>Analiza un texto o audio para ver los resultados</p>
+                        </div>
+                    </div>
+                    <div id="feedback" class="feedback-container"></div>
+                </div>
+            </div>
+            
+            <!-- Historial de análisis -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <h2 class="card-title">Historial de Análisis</h2>
+                    <div class="card-actions">
+                        <button class="btn btn-sm" onclick="descargarCSV()">
+                            <i class="icon">&#x1F4BE;</i> CSV
+                        </button>
+                        <button class="btn btn-sm" onclick="descargarPDF()">
+                            <i class="icon">&#x1F4C4;</i> PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        <table id="historial">
+                            <thead>
+                                <tr>
+                                    <th>Fecha/Hora</th>
+                                    <th>Texto Analizado</th>
+                                    <th>Diagnóstico</th>
+                                    <th>Riesgo</th>
+                                    <th>Origen</th>
+                                    <th class="actions-cell">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 <script src="/static/recorder.js"></script>
 <script>
+// --- AUTENTICACIÓN Y SESIÓN ---
+function mostrarTab(tab) {
+    document.getElementById('form-login').style.display = (tab==='login') ? 'block' : 'none';
+    document.getElementById('form-register').style.display = (tab==='register') ? 'block' : 'none';
+    document.getElementById('auth-msg').innerHTML = '';
+}
+
+function mostrarApp(logged) {
+    document.getElementById('auth-forms').style.display = logged ? 'none' : 'block';
+    document.getElementById('app-main').style.display = logged ? 'block' : 'none';
+}
+
+function guardarToken(token) {
+    localStorage.setItem('token', token);
+}
+function obtenerToken() {
+    return localStorage.getItem('token');
+}
+function logout() {
+    localStorage.removeItem('token');
+    mostrarApp(false);
+}
+
+// Login
+const formLogin = document.getElementById('form-login');
+formLogin.onsubmit = async function(e) {
+    e.preventDefault();
+    const usuario = document.getElementById('login-usuario').value;
+    const password = document.getElementById('login-password').value;
+    const form = new URLSearchParams();
+    form.append('username', usuario);
+    form.append('password', password);
+    try {
+        const resp = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: form
+        });
+        const data = await resp.json();
+        if (resp.ok && data.access_token) {
+            guardarToken(data.access_token);
+            mostrarApp(true);
+            await cargarHistorial();
+        } else {
+            document.getElementById('auth-msg').innerHTML = '<span style="color:red">' + (data.detail || 'Error de autenticación') + '</span>';
+        }
+    } catch (err) {
+        document.getElementById('auth-msg').innerHTML = '<span style="color:red">Error de red</span>';
+    }
+};
+
+// Registro
+const formRegister = document.getElementById('form-register');
+formRegister.onsubmit = async function(e) {
+    e.preventDefault();
+    const usuario = document.getElementById('reg-usuario').value;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    const password2 = document.getElementById('reg-password2').value;
+    if (password !== password2) {
+        document.getElementById('auth-msg').innerHTML = '<span style="color:red">Las contraseñas no coinciden</span>';
+        return;
+    }
+    try {
+        const resp = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: usuario, email, password })
+        });
+        const data = await resp.json();
+        if (resp.ok) {
+            document.getElementById('auth-msg').innerHTML = '<span style="color:green">Registro exitoso, ahora puedes iniciar sesión</span>';
+            mostrarTab('login');
+        } else {
+            document.getElementById('auth-msg').innerHTML = '<span style="color:red">' + (data.detail || 'Error de registro') + '</span>';
+        }
+    } catch (err) {
+        document.getElementById('auth-msg').innerHTML = '<span style="color:red">Error de red</span>';
+    }
+};
+
+// Mostrar el formulario correcto al cargar
+window.addEventListener('DOMContentLoaded', () => {
+    if (obtenerToken()) {
+        mostrarApp(true);
+        // cargarHistorial se llamará automáticamente por otro evento
+    } else {
+        mostrarTab('login');
+        mostrarApp(false);
+    }
+});
+
+// Sistema de tabs para la interfaz
+function showTab(tabId) {
+    // Ocultar todos los contenidos de tabs
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Quitar clase activa de todos los botones
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Mostrar el contenido del tab seleccionado
+    const selectedTab = document.getElementById(tabId);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+    
+    // Activar el botón que corresponde
+    const buttons = document.querySelectorAll('.tab-btn');
+    for (let btn of buttons) {
+        if (btn.getAttribute('onclick').includes(tabId)) {
+            btn.classList.add('active');
+            break;
+        }
+    }
+}
+
+// --- INTERCEPTAR Y AGREGAR TOKEN JWT EN PETICIONES PROTEGIDAS ---
+async function fetchConToken(url, opts={}) {
+    const token = obtenerToken();
+    opts.headers = opts.headers || {};
+    if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+    return fetch(url, opts);
+}
+
+// Sobrescribir funciones protegidas para usar fetchConToken
+// cargarHistorial, eliminarAnalisis, analizarTexto, etc.
+
 let transcripcionAcumulada = '';
 let ultimaTranscripcionMostrada = '';
 let ultimoDiagnosticoMostrado = '';
 
 let historial = [];
 let ultimoResultado = null;
+
+// --- HISTORIAL REAL DESDE LA BASE DE DATOS ---
+async function cargarHistorial() {
+    try {
+        console.log('Cargando historial...');
+        const tbody = document.querySelector('#historial tbody');
+        if (!tbody) {
+            console.error('No se encontró la tabla de historial');
+            return;
+        }
+        
+        // Limpiar tabla primero
+        tbody.innerHTML = '<tr><td colspan="6">Cargando datos...</td></tr>';
+        
+        // Hacer petición al backend
+        const resp = await fetchConToken('/analisis');
+        console.log('Respuesta status:', resp.status);
+        
+        if (!resp.ok) {
+            tbody.innerHTML = '<tr><td colspan="6">No se pudo cargar el historial. Error: ' + resp.status + '</td></tr>';
+            return;
+        }
+        
+        // Obtener datos como texto primero para ver si hay errores
+        const dataText = await resp.text();
+        console.log('Datos raw:', dataText);
+        
+        let data;
+        try {
+            // Convertir a JSON
+            data = JSON.parse(dataText);
+            console.log('Datos JSON:', data);
+            
+            // Verificar que sea un array
+            if (!Array.isArray(data)) {
+                console.error('La respuesta no es un array:', data);
+                tbody.innerHTML = '<tr><td colspan="6">Error: La respuesta no es un array</td></tr>';
+                return;
+            }
+            
+            // Si array vacío
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No hay análisis almacenados</td></tr>';
+                return;
+            }
+            
+            // Actualizar variable historial global
+            historial = data;
+            
+            // Construir HTML directamente
+            let html = '';
+            
+            // Procesar cada elemento del historial
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
+                
+                // Extraer solo el texto
+                const textoCorto = item.texto_analizado ? 
+                    (item.texto_analizado.length > 40 ? item.texto_analizado.substring(0, 40) + '...' : item.texto_analizado) : '-';
+                
+                // Extraer diagnóstico y riesgo del resultado
+                let diagnostico = '?';
+                let riesgo = '?';
+                
+                if (item.resultado) {
+                    try {
+                        const resultadoObj = extraerDiagnosticoYRiesgo(item.resultado);
+                        diagnostico = resultadoObj.diagnostico || '?';
+                        riesgo = resultadoObj.riesgo || '?';
+                    } catch (e) {
+                        console.warn('Error al extraer diagnóstico/riesgo:', e);
+                    }
+                }
+                
+                // Formatear fecha simple
+                const fecha = item.fecha ? new Date(item.fecha).toLocaleString() : '-';
+                
+                // Agregar fila con diagnóstico y riesgo
+                html += `<tr>
+                    <td>${fecha}</td>
+                    <td title="${item.texto_analizado || ''}">${textoCorto}</td>
+                    <td>${diagnostico}</td>
+                    <td>${riesgo}</td>
+                    <td>${item.origen || '-'}</td>
+                    <td><button class='btn' style='background:#ff6b6b' onclick='eliminarAnalisis(${item.id})'>Eliminar</button></td>
+                </tr>`;
+            }
+            
+            // Actualizar tabla
+            tbody.innerHTML = html;
+        } catch (jsonError) {
+            console.error('Error al parsear JSON:', jsonError);
+            tbody.innerHTML = '<tr><td colspan="6">Error al procesar datos: ' + jsonError.message + '</td></tr>';
+        }
+    } catch (error) {
+        console.error('Error general:', error);
+        const tbody = document.querySelector('#historial tbody');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="6">Error: ' + error.message + '</td></tr>';
+        }
+    }
+}
+
+async function eliminarAnalisis(id) {
+    if (!confirm('¿Seguro que deseas eliminar este análisis?')) return;
+    const resp = await fetchConToken(`/analisis/${id}`, { method: 'DELETE' });
+    if (resp.status === 204) {
+        mostrarFeedback('Análisis eliminado exitosamente.');
+        await cargarHistorial();
+    } else {
+        mostrarFeedback('Error al eliminar el análisis.', true);
+    }
+}
+
+function actualizarHistorial() {
+    console.log('Actualizando historial con:', historial);
+    
+    // Verificar que historial sea un array válido
+    if (!Array.isArray(historial)) {
+        console.error('¡Historial no es un array!', historial);
+        historial = [];
+    }
+    
+    // Obtener referencia a la tabla
+    const tbody = document.querySelector('#historial tbody');
+    if (!tbody) {
+        console.error('¡No se encontró la tabla de historial!');
+        return;
+    }
+    
+    // Limpiar tabla
+    tbody.innerHTML = '';
+    
+    // Si no hay datos, mostrar mensaje
+    if (historial.length === 0) {
+        console.warn('Historial vacío:', historial);
+        tbody.innerHTML = '<tr><td colspan="6">No hay análisis almacenados.</td></tr>';
+        return;
+    }
+    
+    // Filtramos para mostrar un solo registro por session_id
+    // 1. Ordenamos por fecha (más reciente primero)
+    const registrosOrdenados = [...historial].sort((a, b) => {
+        return new Date(b.fecha) - new Date(a.fecha);
+    });
+    
+    // 2. Filtramos para tener solo un registro por session_id
+    const sessionIdsVistos = new Set();
+    const historalFiltrado = [];
+    
+    for (const item of registrosOrdenados) {
+        // Si no tiene session_id o aún no lo hemos visto, lo incluimos
+        if (!item.session_id || !sessionIdsVistos.has(item.session_id)) {
+            // Marcamos este session_id como visto
+            if (item.session_id) {
+                sessionIdsVistos.add(item.session_id);
+            }
+            // Agregamos el registro al resultado filtrado
+            historalFiltrado.push(item);
+        }
+    }
+    
+    // Construir filas de la tabla directamente
+    let htmlRows = '';
+    
+    try {
+        // Procesar cada elemento del historial filtrado
+        for (let i = 0; i < historalFiltrado.length; i++) {
+            const item = historalFiltrado[i];
+            if (!item) {
+                console.warn(`Elemento ${i} es nulo o indefinido`);
+                continue;
+            }
+            
+            console.log('Procesando item:', item);
+            
+            try {
+                // Extraer datos seguros de texto analizado
+                let entrada = '-';
+                if (item.texto_analizado) {
+                    entrada = item.texto_analizado.length > 40 ? 
+                        item.texto_analizado.substring(0, 40) + '…' : item.texto_analizado;
+                }
+                
+                // Extraer diagnóstico y riesgo con manejo seguro
+                let diagnostico = '?';
+                let riesgo = '?';
+                
+                if (typeof item.resultado === 'string') {
+                    const resultadoObj = extraerDiagnosticoYRiesgo(item.resultado);
+                    diagnostico = resultadoObj.diagnostico || '?';
+                    riesgo = resultadoObj.riesgo || '?';
+                }
+                
+                // Formatear fecha con manejo seguro
+                let fecha = '-';
+                if (item.fecha) {
+                    try {
+                        fecha = new Date(item.fecha).toLocaleString();
+                    } catch (e) {
+                        console.warn('Error al formatear fecha:', e);
+                    }
+                }
+                
+                // Agregar fila con manejo seguro de todos los campos
+                htmlRows += `<tr>
+                    <td>${fecha}</td>
+                    <td title="${(item.texto_analizado || '').replace(/"/g, '&quot;')}">${entrada}</td>
+                    <td>${diagnostico}</td>
+                    <td>${riesgo}</td>
+                    <td>${item.origen || '-'}</td>
+                    <td><button class='btn' style='background:#ff6b6b' onclick='eliminarAnalisis(${item.id})'>Eliminar</button></td>
+                </tr>`;
+            } catch (error) {
+                console.error('Error al procesar ítem:', error, item);
+                htmlRows += `<tr><td colspan="6">Error en ítem ${i + 1}</td></tr>`;
+            }
+        }
+    } catch (error) {
+        console.error('Error al recorrer historial:', error);
+        htmlRows = '<tr><td colspan="6">Error al procesar el historial: ' + error.message + '</td></tr>';
+    }
+    
+    // Actualizar tabla
+    if (htmlRows) {
+        tbody.innerHTML = htmlRows;
+    } else {
+        tbody.innerHTML = '<tr><td colspan="6">Error al procesar los datos</td></tr>';
+    }
+}
+
+function mostrarFeedback(msg, error=false) {
+    document.getElementById('feedback').innerHTML = `<span style='color:${error?'red':'green'}'>${msg}</span>`;
+    setTimeout(()=>{ document.getElementById('feedback').innerHTML = ''; }, 3000);
+}
+
+// Cargar historial al iniciar - una sola llamada con tiempo de espera para asegurar que todo esté listo
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM cargado, preparando carga de historial...');
+    setTimeout(() => {
+        console.log('Iniciando carga de historial...');
+        cargarHistorial();
+    }, 500); // Pequeño retraso para asegurar que todo esté inicializado
+});
+
+// Refrescar historial tras cada análisis
+async function analizarTexto(origen='manual') {
+    const texto = document.getElementById('texto').value;
+    if (!texto.trim()) {
+        alert('Por favor ingresa un texto para analizar.');
+        return;
+    }
+    
+    document.getElementById('resultado').innerText = 'Analizando...';
+    document.getElementById('feedback').innerHTML = '';
+    
+    try {
+        const resp = await fetchConToken('/analizar-texto', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                texto, 
+                origen,
+                session_id: Date.now().toString() // Identificador único para esta sesión
+            })
+        });
+        
+        if (!resp.ok) {
+            const error = await resp.text();
+            document.getElementById('resultado').innerHTML = `<div style="color:red">Error: ${error}</div>`;
+            return;
+        }
+        
+        const data = await resp.json();
+        let res = data.resultado || data.detail || 'Error';
+        
+        // Extraer diagnóstico y riesgo
+        const {diagnostico, riesgo} = extraerDiagnosticoYRiesgo(res);
+        
+        // Mostrar resultado con color según diagnóstico
+        let color = diagnostico.toLowerCase().includes('estafa') ? '#ffcccc' : '#c8f7c5';
+        document.getElementById('resultado').innerHTML = `
+            <b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diagnostico||'?'}</span>
+            <br>
+            <b>Riesgo:</b> <span style='background:#ffd700;padding:3px 8px;border-radius:5px;'>${riesgo||'?'}%</span>
+            <br><br>
+            <pre style='background:#eef;padding:8px;border-radius:6px;text-wrap: auto;'>${res}</pre>
+        `;
+        
+        // Guardar en variable ultimoResultado (usado por funciones de feedback)
+        ultimoResultado = {
+            texto_analizado: texto,
+            resultado: res,
+            diagnostico,
+            riesgo
+        };
+        
+        // Recargar historial para mostrar el nuevo análisis
+        await cargarHistorial();
+        
+        console.log('Análisis completo:', { diagnostico, riesgo, origen });
+    } catch (error) {
+        console.error('Error al analizar texto:', error);
+        document.getElementById('resultado').innerHTML = `<div style="color:red">Error: ${error.message}</div>`;
+    }
+}
 
 function extraerDiagnosticoYRiesgo(texto) {
     const diagMatch = texto.match(/Diagnóstico:\s*(.*)/i);
@@ -231,7 +1138,7 @@ async function analizarTexto(origen='manual') {
     const texto = document.getElementById('texto').value;
     document.getElementById('resultado').innerText = 'Analizando...';
     document.getElementById('feedback').innerHTML = '';
-    const resp = await fetch('/analizar-texto', {
+    const resp = await fetchConToken('/analizar-texto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ texto })
@@ -241,11 +1148,9 @@ async function analizarTexto(origen='manual') {
     // Extraer diagnóstico y riesgo
     const {diagnostico, riesgo} = extraerDiagnosticoYRiesgo(res);
     let color = diagnostico.toLowerCase().includes('estafa') ? '#ffcccc' : '#c8f7c5';
-    document.getElementById('resultado').innerHTML = `<b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diagnostico||'?'}</span><br><b>Riesgo:</b> <span style='background:#ffd700;padding:3px 8px;border-radius:5px;'>${riesgo||'?'}%</span><br><br><pre style='background:#eef;padding:8px;border-radius:6px;'>${res}</pre>`;
-    // Guardar en historial
-    ultimoResultado = { fecha: new Date().toLocaleString(), entrada: texto, diagnostico, riesgo, origen, feedback: '' };
-    historial.unshift(ultimoResultado);
-    actualizarHistorial();
+    document.getElementById('resultado').innerHTML = `<b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diagnostico||'?'}</span><br><b>Riesgo:</b> <span style='background:#ffd700;padding:3px 8px;border-radius:5px;'>${riesgo||'?'}%</span><br><br><pre style='background:#eef;padding:8px;border-radius:6px;text-wrap: auto;'>${res}</pre>`;
+    // Recargar historial desde la base de datos tras analizar
+    await cargarHistorial();
     mostrarFeedback();
 }
 
@@ -259,7 +1164,7 @@ async function subirAudio() {
     document.getElementById('feedback').innerHTML = '';
     const formData = new FormData();
     formData.append('file', input.files[0]);
-    const resp = await fetch('/transcribir-audio', {
+    const resp = await fetchConToken('/transcribir-audio', {
         method: 'POST',
         body: formData
     });
@@ -302,44 +1207,121 @@ function guardarFeedback(valor) {
 }
 
 function descargarCSV() {
-    if (historial.length === 0) {
+    // Obtener filas directamente de la tabla visible
+    const tabla = document.querySelector('#historial tbody');
+    const filas = tabla.querySelectorAll('tr');
+    
+    // Verificar si hay datos en la tabla
+    if (!filas || filas.length === 0 || filas[0].textContent.includes('No hay análisis')) {
         alert('No hay datos para exportar.');
         return;
     }
-    const encabezado = ['Fecha/Hora','Entrada','Diagnóstico','Riesgo','Feedback'];
-    const filas = historial.map(h => [h.fecha, h.entrada.replace(/\n/g, ' '), h.diagnostico, h.riesgo, h.feedback]);
-    let csv = encabezado.join(',') + '\n';
-    filas.forEach(fila => {
-        csv += fila.map(campo => '"'+String(campo).replace(/"/g,'""')+'"').join(',') + '\n';
-    });
-    const blob = new Blob([csv], {type: 'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'historial_detector_fraudes.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    
+    try {
+        // Encabezados para el CSV
+        const encabezado = ['Fecha/Hora', 'Texto Analizado', 'Diagnostico', 'Riesgo', 'Origen'];
+        let datosCSV = [];
+        
+        // Extraer datos de cada fila de la tabla
+        filas.forEach(fila => {
+            const celdas = fila.querySelectorAll('td');
+            if (celdas.length >= 5) {
+                // [Fecha, Texto, Diagnóstico, Riesgo, Origen]
+                datosCSV.push([
+                    celdas[0].textContent.trim(),
+                    celdas[1].textContent.trim(),
+                    celdas[2].textContent.trim(),
+                    celdas[3].textContent.trim(),
+                    celdas[4].textContent.trim()
+                ]);
+            }
+        });
+        
+        // Crear contenido CSV
+        let csv = encabezado.join(',') + '\n';
+        datosCSV.forEach(fila => {
+            csv += fila.map(campo => '"'+(campo ? String(campo).replace(/"/g,'""') : '')+'"').join(',') + '\n';
+        });
+        
+        // Crear y descargar archivo
+        const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'historial_detector_fraudes.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log('CSV generado con éxito');
+    } catch (error) {
+        console.error('Error al generar CSV:', error);
+        alert('Error al generar el archivo CSV: ' + error.message);
+    }
 }
 
 function descargarPDF() {
-    if (historial.length === 0) {
+    // Obtener filas directamente de la tabla visible
+    const tabla = document.querySelector('#historial tbody');
+    const filas = tabla.querySelectorAll('tr');
+    
+    // Verificar si hay datos en la tabla
+    if (!filas || filas.length === 0 || filas[0].textContent.includes('No hay análisis')) {
         alert('No hay datos para exportar.');
         return;
     }
-    let ventana = window.open('', '', 'width=800,height=600');
-    ventana.document.write('<html><head><title>Historial de Análisis</title></head><body>');
-    ventana.document.write('<h2>Historial de Análisis de Estafas</h2>');
-    ventana.document.write('<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">');
-    ventana.document.write('<tr><th>Fecha/Hora</th><th>Entrada</th><th>Diagnóstico</th><th>Riesgo</th><th>Feedback</th></tr>');
-    historial.forEach(h => {
-        ventana.document.write(`<tr><td>${h.fecha}</td><td>${h.entrada.replace(/\n/g,' ')}</td><td>${h.diagnostico}</td><td>${h.riesgo}</td><td>${h.feedback}</td></tr>`);
-    });
-    ventana.document.write('</table>');
-    ventana.document.write('</body></html>');
-    ventana.document.close();
-    ventana.print();
+    
+    try {
+        // Abrir ventana para impresión
+        let ventana = window.open('', '', 'width=800,height=600');
+        ventana.document.write('<html><head>');
+        ventana.document.write('<title>Historial de Análisis</title>');
+        ventana.document.write('<style>body{font-family:Arial,sans-serif;margin:20px;}table{width:100%;border-collapse:collapse;}th{background:#e6eaff;}th,td{padding:8px;text-align:left;border:1px solid #ddd;}h2{color:#2563eb;}</style>');
+        ventana.document.write('</head><body>');
+        ventana.document.write('<h2>Historial de Análisis de Estafas</h2>');
+        
+        // Crear tabla
+        ventana.document.write('<table>');
+        ventana.document.write('<tr><th>Fecha/Hora</th><th>Texto Analizado</th><th>Diagnóstico</th><th>Riesgo</th><th>Origen</th></tr>');
+        
+        // Extraer datos de cada fila de la tabla
+        filas.forEach(fila => {
+            const celdas = fila.querySelectorAll('td');
+            if (celdas.length >= 5) {
+                // Extraer datos de las celdas
+                const fecha = celdas[0].textContent.trim();
+                const texto = celdas[1].textContent.trim();
+                const diagnostico = celdas[2].textContent.trim();
+                const riesgo = celdas[3].textContent.trim();
+                const origen = celdas[4].textContent.trim();
+                
+                // Escribir fila
+                ventana.document.write(`<tr>
+                    <td>${fecha}</td>
+                    <td>${texto}</td>
+                    <td>${diagnostico}</td>
+                    <td>${riesgo}</td>
+                    <td>${origen}</td>
+                </tr>`);
+            }
+        });
+        
+        ventana.document.write('</table>');
+        ventana.document.write('<div style="margin-top:20px;font-size:12px;color:#666;">FraudWatch AI Service - Generado el ' + new Date().toLocaleString() + '</div>');
+        ventana.document.write('</body></html>');
+        ventana.document.close();
+        
+        // Imprimir después de que todo se haya cargado
+        setTimeout(() => {
+            ventana.print();
+        }, 500);
+        
+        console.log('PDF preparado para imprimir');
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        alert('Error al generar el archivo PDF: ' + error.message);
+    }
 }
 // --- Grabación y análisis en tiempo real desde micrófono (WAV con Recorder.js) ---
 let recorder, audioContext, micActive = false, micSessionId = null, micInterval = null;
@@ -442,9 +1424,11 @@ async function enviarFragmento(blob, transcripcionAcumulada) {
     if (transcripcionAcumulada) {
         formData.append('texto_acumulado', transcripcionAcumulada);
     }
+    // Añadir origen para identificar que viene del micrófono
+    formData.append('origen', 'microfono');
     console.log('[Mic] Enviando fragmento a backend:', blob.size, 'bytes, texto acumulado:', transcripcionAcumulada);
     try {
-        let resp = await fetch('/analizar-audio-stream?session_id=' + micSessionId, {
+        let resp = await fetchConToken('/analizar-audio-stream?session_id=' + micSessionId, {
             method: 'POST',
             body: formData
         });
@@ -456,7 +1440,11 @@ async function enviarFragmento(blob, transcripcionAcumulada) {
         }
         let data = await resp.json();
         console.log('[Mic] Respuesta backend:', data);
-        mostrarMicResultado(data);
+        // mostrarMicResultado(data);
+        // Si la respuesta es correcta, actualizar la UI
+        if (data && (data.transcripcion || data.diagnostico)) {
+            mostrarMicResultado(data);
+        }
     } catch (e) {
         console.error('[Mic] Error al enviar fragmento:', e);
         document.getElementById('mic-result').innerHTML = '<span style="color:red">Error al analizar audio en tiempo real</span>';
@@ -464,6 +1452,14 @@ async function enviarFragmento(blob, transcripcionAcumulada) {
 }
 
 function mostrarMicResultado(data) {
+    // Verificar que tenemos datos válidos
+    if (!data || (!data.transcripcion && !data.diagnostico)) {
+        return; // No hay datos para mostrar
+    }
+    
+    // Referencia a la sección de resultados principal
+    const resultadoSection = document.getElementById('resultado');
+    
     let html = '';
     let transcripcionAnterior = ultimaTranscripcionMostrada;
     let diagnosticoAnterior = ultimoDiagnosticoMostrado;
@@ -485,6 +1481,9 @@ function mostrarMicResultado(data) {
         html += `<b>Último fragmento:</b> <span style='color:#2563eb'>${data.transcripcion}</span><br>`;
     }
 
+    // Preparar HTML para el resultado principal
+    let resultadoHTML = '';
+    
     // Solo actualizar diagnóstico si la transcripción acumulada cambió
     if (data.diagnostico && transcripcionAcumulada.trim() !== transcripcionAnterior.trim()) {
         ultimaTranscripcionMostrada = transcripcionAcumulada;
@@ -492,14 +1491,46 @@ function mostrarMicResultado(data) {
         // Extraer diagnóstico/riesgo como en analizarTexto
         const diag = extraerDiagnosticoYRiesgo(data.diagnostico);
         let color = diag.diagnostico.toLowerCase().includes('estafa') ? '#ffcccc' : '#c8f7c5';
-        html += `<b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diag.diagnostico||'?'} </span> <b>Riesgo:</b> <span class='riesgo'>${diag.riesgo||'?'}%</span><br><pre>${data.diagnostico}</pre>`;
+        resultadoHTML = `
+            <h3>Análisis de audio en tiempo real</h3>
+            <p><b>Texto transcrito:</b> ${transcripcionAcumulada}</p>
+            <b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diag.diagnostico||'?'}</span>
+            <br>
+            <b>Riesgo:</b> <span style='background:#ffd700;padding:3px 8px;border-radius:5px;'>${diag.riesgo||'?'}%</span>
+            <br><br>
+            <pre style='background:#eef;padding:8px;border-radius:6px;text-wrap: auto;'>${data.diagnostico}</pre>
+        `;
+        
+        // Guardar en variable ultimoResultado (usado por funciones de feedback)
+        ultimoResultado = {
+            texto_analizado: transcripcionAcumulada,
+            resultado: data.diagnostico,
+            diagnostico: diag.diagnostico,
+            riesgo: diag.riesgo
+        };
+        
     } else if (ultimoDiagnosticoMostrado) {
         // Si no hay cambio en la transcripción, mantener el último diagnóstico
         const diag = extraerDiagnosticoYRiesgo(ultimoDiagnosticoMostrado);
         let color = diag.diagnostico.toLowerCase().includes('estafa') ? '#ffcccc' : '#c8f7c5';
-        html += `<b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diag.diagnostico||'?'} </span> <b>Riesgo:</b> <span class='riesgo'>${diag.riesgo||'?'}%</span><br><pre>${ultimoDiagnosticoMostrado}</pre>`;
+        resultadoHTML = `
+            <h3>Análisis de audio en tiempo real</h3>
+            <p><b>Texto transcrito:</b> ${transcripcionAcumulada}</p>
+            <b>Diagnóstico:</b> <span style='background:${color};padding:3px 8px;border-radius:5px;'>${diag.diagnostico||'?'}</span>
+            <br>
+            <b>Riesgo:</b> <span style='background:#ffd700;padding:3px 8px;border-radius:5px;'>${diag.riesgo||'?'}%</span>
+            <br><br>
+            <pre style='background:#eef;padding:8px;border-radius:6px;text-wrap: auto;'>${ultimoDiagnosticoMostrado}</pre>
+        `;
     }
+    
+    // Mostrar en pantalla
     document.getElementById('mic-result').innerHTML = html || '<i>Esperando audio...</i>';
+    
+    // Actualizar la sección principal de resultados si tenemos diagnóstico
+    if (resultadoHTML) {
+        resultadoSection.innerHTML = resultadoHTML;
+    }
 }
 // Reiniciar la transcripción acumulada al iniciar grabación
 const originalIniciarGrabacion = iniciarGrabacion;

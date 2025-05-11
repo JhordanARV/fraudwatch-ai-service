@@ -14,29 +14,51 @@ import importlib.util
 import pytest
 from fastapi.testclient import TestClient
 
-# Importar la app desde app/main.py usando importlib
-main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'app', 'main.py'))
-if not os.path.exists(main_path):
-    main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app', 'main.py'))
-spec = importlib.util.spec_from_file_location("main", main_path)
-main = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(main)
+# Intentar importar la app directamente si el paquete está bien estructurado
+try:
+    from app.main import app
+except ImportError:
+    # Fallback a importlib si falla la importación directa
+    import importlib.util
+    main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'app', 'main.py'))
+    if not os.path.exists(main_path):
+        main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app', 'main.py'))
+    spec = importlib.util.spec_from_file_location("main", main_path)
+    main = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(main)
+    app = main.app
 
-client = TestClient(main.app)
+client = TestClient(app)
 
 def test_home():
     response = client.get("/")
     assert response.status_code == 200
     assert "<!DOCTYPE html>" in response.text
 
-def test_analizar_texto():
-    response = client.post("/analizar-texto", json={"texto": "Esto es una prueba de estafa"})
+def test_register_and_login():
+    # Registro
+    user = {"username": "testuser", "email": "testuser@example.com", "password": "testpass123"}
+    response = client.post("/register", json=user)
+    assert response.status_code in (200, 400)  # 400 si ya existe
+    # Login
+    response = client.post("/login", data={"username": user["username"], "password": user["password"]})
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    assert token
+    return token
+
+def test_analizar_texto_autenticado():
+    token = test_register_and_login()
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.post("/analizar-texto", json={"texto": "Esto es una prueba de estafa"}, headers=headers)
     assert response.status_code == 200
     assert "resultado" in response.json()
 
 def test_transcribir_audio_wav():
-    # Se prueba que rechaza archivos que no sean .wav
-    response = client.post("/transcribir-audio", files={"file": ("test.mp3", b"fakecontent")})
+    # Usar autenticación JWT
+    token = test_register_and_login()
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.post("/transcribir-audio", files={"file": ("test.mp3", b"fakecontent")}, headers=headers)
     assert response.status_code == 400
     assert response.json()["detail"] == "Solo se aceptan archivos .wav"
 

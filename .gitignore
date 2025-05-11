@@ -2,3 +2,8 @@ venv/
 .env
 __pycache__
 temp_*.wav
+# Alembic: incluir migraciones, pero ignora archivos temporales
+alembic/versions/*.pyc
+alembic/versions/__pycache__/
+# Si usas SQLite solo para pruebas locales
+*.db

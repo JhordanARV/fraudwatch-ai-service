@@ -8,4 +8,10 @@ grpcio==1.71.0
 grpcio-tools==1.71.0
 pytest==8.2.0
 python-dotenv==1.1.0
+sqlalchemy
+asyncpg
+alembic
+passlib[bcrypt]
+python-jose[cryptography]
+
 
