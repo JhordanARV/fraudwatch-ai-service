@@ -225,7 +225,9 @@ async def analizar_audio_grpc(
 ):
     """Envía el audio al microservicio gRPC y retorna la transcripción, diagnóstico y riesgo."""
     audio_bytes = await file.read()
-    channel = grpc.insecure_channel("localhost:50051")
+    import os
+    GRPC_SERVER_URL = os.getenv("GRPC_SERVER_URL", "localhost:50051")
+    channel = grpc.insecure_channel(GRPC_SERVER_URL)
     stub = fraud_detection_pb2_grpc.FraudDetectionStub(channel)
     def audio_chunks():
         yield fraud_detection_pb2.AudioChunk(data=audio_bytes, session_id=session_id)
