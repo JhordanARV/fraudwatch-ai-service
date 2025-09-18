@@ -214,7 +214,7 @@ class AnalisisTextoResponse(BaseModel):
     resultado: str
     class Config:
         from_attributes = True
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "resultado": "Diagnóstico: Estafa\n\nExplicación: Este mensaje solicita datos personales...\n\nRiesgo: 90/100"
             }
@@ -224,7 +224,7 @@ class TranscripcionResponse(BaseModel):
     transcripcion: str
     class Config:
         from_attributes = True
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "transcripcion": "Has sido seleccionado para recibir un premio..."
             }
@@ -237,7 +237,7 @@ class AnalisisAudioStreamResponse(BaseModel):
     ruta_archivo: str = None
     class Config:
         from_attributes = True
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "session_id": "session-123",
                 "transcripcion": "Has sido seleccionado para recibir un premio...",
